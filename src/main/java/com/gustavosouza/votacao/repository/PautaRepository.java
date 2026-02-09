@@ -26,5 +26,4 @@ public interface PautaRepository extends JpaRepository<PautaModel, Long> {
 
     List<PautaModel> findByDataEncerramentoBetween (LocalDate dataInicial, LocalDate dataFinal);
 
-
 }

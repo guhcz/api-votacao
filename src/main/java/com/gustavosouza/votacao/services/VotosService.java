@@ -1,6 +1,8 @@
 package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
+import com.gustavosouza.votacao.exception.NoDateFoundException;
+import com.gustavosouza.votacao.exception.NoVoteFoundException;
 import com.gustavosouza.votacao.model.VotosModel;
 import com.gustavosouza.votacao.repository.VotoRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,7 @@ public class VotosService {
     }
 
     public VotosModel atualizarVoto(Long idVoto, VotosModel votosModel) {
-        VotosModel votoEntity = votoRepository.findById(idVoto).orElseThrow(() -> new RuntimeException("Pauta nao encontrada!"));
+        VotosModel votoEntity = votoRepository.findById(idVoto).orElseThrow(() -> new NoVoteFoundException());
         VotosModel votoAtualizado = VotosModel.builder()
                 .assuntoVotado(votosModel.getAssuntoVotado() != null ? votosModel.getAssuntoVotado() :
                         votoEntity.getAssuntoVotado())
@@ -44,7 +46,7 @@ public class VotosService {
         if (voto.isPresent()){
             votoRepository.delete(voto.get());
         } else {
-            throw new RuntimeException("Voto nao encontrado!");
+            throw new NoVoteFoundException();
         }
     }
 
@@ -54,20 +56,21 @@ public class VotosService {
 
     public VotosModel buscarVotosPeloID(Long id) {
         return votoRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Voto nao encontrado!")
+                () -> new NoVoteFoundException()
         );
     }
 
     public List<VotosModel> buscarPeloAssunto(String assuntoVotado) {
         return votoRepository.findByAssuntoVotado(assuntoVotado).orElseThrow(
-                () -> new RuntimeException("Voto nao encontrado!"));
+                () -> new NoVoteFoundException()
+        );
     }
 
     public List<VotosModel> buscarPelaData(LocalDate dataInicial, LocalDate dataFinal) {
         List<VotosModel> votos = votoRepository.findByDataVotoBetween(dataInicial, dataFinal);
 
         if (votos.isEmpty()) {
-            throw new RuntimeException("Pesquisa nao encontrada!");
+            throw new NoDateFoundException();
         } else {
             return votos;
         }

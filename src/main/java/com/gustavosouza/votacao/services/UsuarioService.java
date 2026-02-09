@@ -2,6 +2,8 @@ package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
 import com.gustavosouza.votacao.dto.UsuarioExibicaoDto;
+import com.gustavosouza.votacao.exception.NoDateFoundException;
+import com.gustavosouza.votacao.exception.NoUserFoundException;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,7 @@ public class UsuarioService {
     }
 
     public UsuarioExibicaoDto atualizarUsuarioPorId(Long id, UsuarioModel usuario) {
-        UsuarioModel usuarioEntity = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario nao encontrado!"));
+        UsuarioModel usuarioEntity = usuarioRepository.findById(id).orElseThrow(() -> new NoUserFoundException());
         UsuarioModel usuarioAtualizado = UsuarioModel.builder()
                 .email(usuario.getEmail() != null ? usuario.getEmail() :
                         usuarioEntity.getEmail())
@@ -54,20 +56,20 @@ public class UsuarioService {
 
     public UsuarioModel buscarPorId(Long idUsuario) {
         return usuarioRepository.findById(idUsuario).orElseThrow(
-                () -> new RuntimeException("Id do usuario nao encontrado!")
+                () -> new NoUserFoundException()
         );
     }
 
     public UsuarioExibicaoDto buscarUsuarioPorEmail(String email) {
         return new UsuarioExibicaoDto(usuarioRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("E-mail nao encontrado!")
+                () -> new NoUserFoundException()
         ));
     }
 
     public List<UsuarioExibicaoDto> filtrarPelaDataNascimento(LocalDate dataInicial, LocalDate dataFinal) {
         List<UsuarioModel> usuario = usuarioRepository.findByDataNascimentoBetween(dataInicial, dataFinal);
         if (usuario.isEmpty()) {
-            throw new RuntimeException("Nenhuma data encontrada de acordo com o filtro!");
+            throw new NoDateFoundException();
         }
         return usuario
                 .stream()
