@@ -24,20 +24,13 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
     public UsuarioExibicaoDto salvarUsuario(UsuarioCadastroDto usuarioDto) {
-        if (this.usuarioRepository.findByEmail(usuarioDto.email()) != null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         String senhaCriptografada = new BCryptPasswordEncoder().encode(usuarioDto.senha());
-        UsuarioModel usuario = new UsuarioModel(usuarioDto.email(), senhaCriptografada, usuarioDto.role());
 
-        this.usuarioRepository.save(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-
-
-
-//        UsuarioModel usuario = new UsuarioModel();
-//        BeanUtils.copyProperties(usuarioDto, usuario);
-//        return new UsuarioExibicaoDto(usuarioRepository.save(usuario));
+        UsuarioModel usuario = new UsuarioModel();
+        BeanUtils.copyProperties(usuarioDto, usuario);
+        usuario.setSenha(senhaCriptografada);
+        return new UsuarioExibicaoDto(usuarioRepository.save(usuario));
     }
 
     public UsuarioExibicaoDto atualizarUsuarioPorId(Long id, UsuarioModel usuario) {

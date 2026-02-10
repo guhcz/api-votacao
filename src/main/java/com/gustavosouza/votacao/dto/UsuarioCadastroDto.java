@@ -21,7 +21,7 @@ public record UsuarioCadastroDto(
         @NotNull(message = "O campo data de nascimento precisa ser preenchido!")
         LocalDate dataNascimento,
 
-        @NotBlank(message = "O campo nome precisa ser preenchido!")
+        @NotNull(message = "O campo nome precisa ser preenchido!")
         UserRoles role
 ) {
 }
