@@ -2,11 +2,11 @@ package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
+import com.gustavosouza.votacao.exception.NoAgendaFoundException;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.repository.PautaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ public class PautaService {
     }
 
     public PautaExibicaoDto atualizarPauta(Long idPauta, PautaModel pauta) {
-        PautaModel pautaEntity = repository.findById(idPauta).orElseThrow(() -> new RuntimeException("Pauta nao encontrada!"));
+        PautaModel pautaEntity = repository.findById(idPauta).orElseThrow(() -> new NoAgendaFoundException());
         PautaModel pautaAtualizada = PautaModel.builder()
                 .assunto(pauta.getAssunto() != null ? pauta.getAssunto() :
                         pautaEntity.getAssunto())
@@ -57,12 +57,12 @@ public class PautaService {
     }
 
     public PautaModel buscarPautaPeloId(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Pauta nao encontrada!"));
+        return repository.findById(id).orElseThrow(() -> new NoAgendaFoundException());
     }
 
     public PautaExibicaoDto buscarPautaPeloAssunto(String assunto) {
         return new PautaExibicaoDto(repository.findByAssunto(assunto)
-                .orElseThrow(() -> new RuntimeException("Pauta nao encontrada!")
+                .orElseThrow(() -> new NoAgendaFoundException()
                 ));
     }
 
@@ -70,7 +70,7 @@ public class PautaService {
         List<PautaModel> pauta = repository.findByQuantidadeDeVotosNecessarios(quantidadeDeVotosNecessarios);
 
         if (pauta.isEmpty()) {
-            throw new RuntimeException("Pauta nao encontrada!");
+            throw new NoAgendaFoundException();
         }
         return pauta
                 .stream()
@@ -82,7 +82,7 @@ public class PautaService {
         List<PautaModel> pauta = repository.findByDataInicioBetween(primeiraData, segundaData);
 
         if (pauta.isEmpty()) {
-            throw new RuntimeException("Pauta nao encontrada!");
+            throw new NoAgendaFoundException();
         }
         return pauta
                 .stream()
@@ -94,7 +94,7 @@ public class PautaService {
         List<PautaModel> pauta = repository.findByDataEncerramentoBetween(dataInicial, dataFinal);
 
         if (pauta.isEmpty()) {
-            throw new RuntimeException("Pauta nao encontrada!");
+            throw new NoAgendaFoundException();
         }
         return pauta
                 .stream()
