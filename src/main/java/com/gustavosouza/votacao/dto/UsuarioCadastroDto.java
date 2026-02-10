@@ -1,5 +1,6 @@
 package com.gustavosouza.votacao.dto;
 
+import com.gustavosouza.votacao.security.UserRoles;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,9 @@ public record UsuarioCadastroDto(
         String senha,
 
         @NotNull(message = "O campo data de nascimento precisa ser preenchido!")
-        LocalDate dataNascimento
+        LocalDate dataNascimento,
+
+        @NotNull(message = "O campo nome precisa ser preenchido!")
+        UserRoles role
 ) {
 }
