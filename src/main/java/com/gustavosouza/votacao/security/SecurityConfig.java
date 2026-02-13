@@ -25,7 +25,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/usuario/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/votos").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pauta").hasAnyRole("ADMIN", "MANAGER")
@@ -37,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/pauta/deletar/id").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/pauta/deletar/assunto").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.GET, "/usuario/buscar/id").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/usuario/buscar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/votos/buscar/id").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/pauta/buscar/id").hasAnyRole("ADMIN", "MANAGER")
                         .anyRequest().authenticated()

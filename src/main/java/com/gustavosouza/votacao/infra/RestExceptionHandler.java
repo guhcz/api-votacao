@@ -1,9 +1,6 @@
 package com.gustavosouza.votacao.infra;
 
-import com.gustavosouza.votacao.exception.NoAgendaFoundException;
-import com.gustavosouza.votacao.exception.NoDateFoundException;
-import com.gustavosouza.votacao.exception.NoUserFoundException;
-import com.gustavosouza.votacao.exception.NoVoteFoundException;
+import com.gustavosouza.votacao.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -39,6 +36,24 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoVoteFoundException.class)
     private ResponseEntity<RestErrorMessage> voteNotFoundHandler(NoVoteFoundException exception){
+        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(threatResponse);
+    }
+
+    @ExceptionHandler(TokenInvalidException.class)
+    private ResponseEntity<RestErrorMessage> tokenInvalidHandler(TokenInvalidException exception){
+        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(threatResponse);
+    }
+
+    @ExceptionHandler(ErrorGenerateTokenException.class)
+    private ResponseEntity<RestErrorMessage> errorGenerateTokenHandler(ErrorGenerateTokenException exception){
+        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(threatResponse);
+    }
+
+    @ExceptionHandler(NoCityFoundException.class)
+    private ResponseEntity<RestErrorMessage> noCityFoundHandler(NoCityFoundException exception){
         RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(threatResponse);
     }

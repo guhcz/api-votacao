@@ -2,6 +2,8 @@ package com.gustavosouza.votacao.repository;
 
 import com.gustavosouza.votacao.model.PautaModel;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,10 +22,10 @@ public interface PautaRepository extends JpaRepository<PautaModel, Long> {
 
     Optional<PautaModel> findByAssunto(String assunto);
 
-    List<PautaModel> findByQuantidadeDeVotosNecessarios(Integer quantidadeDeVotosNecessarios);
+    Page<PautaModel> findByQuantidadeDeVotosNecessarios(Integer quantidadeDeVotosNecessarios, Pageable pageable);
 
-    List<PautaModel> findByDataInicioBetween (LocalDate primeiraData, LocalDate segundaData);
+    Page<PautaModel> findByDataInicioBetween (LocalDate primeiraData, LocalDate segundaData, Pageable pageable);
 
-    List<PautaModel> findByDataEncerramentoBetween (LocalDate dataInicial, LocalDate dataFinal);
+    Page<PautaModel> findByDataEncerramentoBetween (LocalDate dataInicial, LocalDate dataFinal, Pageable pageable);
 
 }
