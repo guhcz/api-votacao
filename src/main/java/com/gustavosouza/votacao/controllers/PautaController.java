@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import jdk.dynalink.linker.LinkerServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,8 +51,11 @@ public class PautaController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     @GetMapping ("/buscar")
-    public ResponseEntity<List<PautaExibicaoDto>> buscarTodasPautas(){
-        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarTodasPautas());
+    public ResponseEntity<Page<PautaExibicaoDto>> buscarTodasPautas(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        size = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("idPauta").descending());
+
+        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarTodasPautas(pageable));
     }
 
     @GetMapping("/buscar/id/{id}")
@@ -64,18 +70,21 @@ public class PautaController {
 
 
     @GetMapping("/buscar/votos/{quantidadeDeVotosNecessarios}")
-    public ResponseEntity<List<PautaExibicaoDto>> buscarPautaPeloNumeroDeVotos(@RequestParam Integer quantidadeDeVotosNecessarios){
-        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPautaPeloNumeroDeVotos(quantidadeDeVotosNecessarios));
+    public ResponseEntity<Page<PautaExibicaoDto>> buscarPautaPeloNumeroDeVotos(@RequestParam Integer quantidadeDeVotosNecessarios,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPautaPeloNumeroDeVotos(quantidadeDeVotosNecessarios, pageable));
     }
 
     @GetMapping("/buscar/dataInicio/{primeiraData}/{segundaData}")
-    public ResponseEntity<List<PautaExibicaoDto>> buscarPelaDataInicio(@PathVariable LocalDate primeiraData, @PathVariable LocalDate segundaData){
-        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPelaDataInicio(primeiraData, segundaData));
+    public ResponseEntity<Page<PautaExibicaoDto>> buscarPelaDataInicio(@PathVariable LocalDate primeiraData, @PathVariable LocalDate segundaData, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPelaDataInicio(primeiraData, segundaData, pageable));
     }
 
     @GetMapping("buscar/dataEncerramento/{dataInicial}/{dataFinal}")
-    public ResponseEntity<List<PautaExibicaoDto>> buscarPelaDataEncerramento(@PathVariable LocalDate dataInicial, @PathVariable LocalDate dataFinal){
-        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPelaDataEncerramento(dataInicial,dataFinal));
+    public ResponseEntity<Page<PautaExibicaoDto>> buscarPelaDataEncerramento(@PathVariable LocalDate dataInicial, @PathVariable LocalDate dataFinal, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPelaDataEncerramento(dataInicial,dataFinal, pageable));
     }
 
 

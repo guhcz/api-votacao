@@ -6,6 +6,10 @@ import com.gustavosouza.votacao.model.VotosModel;
 import com.gustavosouza.votacao.services.VotosService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +41,10 @@ public class VotoController {
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<List<VotosModel>> listarTodos() {
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarTodosVotos());
+    public ResponseEntity<Page<VotosModel>> listarTodos(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        size = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("idVoto").descending());
+        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarTodosVotos(pageable));
     }
 
     @GetMapping("/buscar/id/{id}")
@@ -47,13 +53,15 @@ public class VotoController {
     }
 
     @GetMapping("/buscar/assunto/{assunto}")
-    public ResponseEntity<List<VotosModel>> buscarPeloAssunto(@PathVariable String assunto) {
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPeloAssunto(assunto));
+    public ResponseEntity<Page<VotosModel>> buscarPeloAssunto(@PathVariable String assunto, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPeloAssunto(assunto, pageable));
     }
 
     @GetMapping("/buscar/data/{dataInicial}/{dataFinal}")
-    public ResponseEntity<List<VotosModel>> buscarPelaData(@PathVariable LocalDate dataInicial, @PathVariable LocalDate dataFinal) {
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPelaData(dataInicial, dataFinal));
+    public ResponseEntity<Page<VotosModel>> buscarPelaData(@PathVariable LocalDate dataInicial, @PathVariable LocalDate dataFinal, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPelaData(dataInicial, dataFinal, pageable));
     }
 
 }

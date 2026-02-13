@@ -3,6 +3,8 @@ package com.gustavosouza.votacao.repository;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.model.VotosModel;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,9 +15,9 @@ import java.util.Optional;
 @Repository
 public interface VotoRepository extends JpaRepository<VotosModel, Long> {
 
-    Optional<List<VotosModel>> findByAssuntoVotado(String assuntoVotado);
+    Optional<Page<VotosModel>> findByAssuntoVotado(String assuntoVotado, Pageable pageable);
 
-    List<VotosModel> findByDataVotoBetween(LocalDate dataInicial, LocalDate dataFinal);
+    Page<VotosModel> findByDataVotoBetween(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable);
 
 
 }

@@ -2,6 +2,10 @@ package com.gustavosouza.votacao.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.gustavosouza.votacao.exception.ErrorGenerateTokenException;
+import com.gustavosouza.votacao.exception.TokenInvalidException;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,24 +20,56 @@ public class TokenService {
     @Value("${api.security.token.security}")
     private String secret;
 
-    public String generateToken(UserDetails user){
-        Algorithm algorithm = Algorithm.HMAC256(secret);
+    private static final String ISSUER = "Usuário token";
 
+    private Algorithm algorithm() {
+        return Algorithm.HMAC256(secret);
+    }
+
+    public String generateToken(UserDetails user) {
+        try {
+            String token = JWT.create()
+                    .withIssuer(ISSUER)
+                    .withSubject(user.getUsername())
+                    .withExpiresAt(Instant.now().plus(2, ChronoUnit.HOURS))
+                    .sign(algorithm());
+            return token;
+        } catch (JWTCreationException exception) {
+            throw new ErrorGenerateTokenException();
+        }
+    }
+
+    public String validateAndGetSubject(String token) {
+        try {
+            return JWT.require(algorithm())
+                    .withIssuer(ISSUER)
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            return "";
+        }
+    }
+
+    public String generateEmailConfirmationToken(UsuarioModel usuario) {
+        Instant expiresAt = Instant.now().plus(30, ChronoUnit.MINUTES);
         return JWT.create()
-                .withIssuer("Usuário token")
-                .withSubject(user.getUsername())
-                .withExpiresAt(Instant.now().plus(2, ChronoUnit.HOURS))
-                .sign(algorithm);
+                .withIssuer(ISSUER)
+                .withSubject(usuario.getEmail())
+                .withClaim("purpose", "email_confirm")
+                .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
+                .sign(algorithm());
     }
 
-    public String validateAndGetSubject(String token){
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-
-        return JWT.require(algorithm)
-                .withIssuer("Usuário token")
+    public String validateEmailConfirmationTokenAndGetEmail(String token) {
+        var decoded = JWT.require(algorithm())
+                .withIssuer(ISSUER)
                 .build()
-                .verify(token)
-                .getSubject();
+                .verify(token);
+        String purpose = decoded.getClaim("purpose").asString();
+        if (!"email_confirm".equals(purpose)) {
+            throw new TokenInvalidException();
+        }
+        return decoded.getSubject();
     }
-
 }

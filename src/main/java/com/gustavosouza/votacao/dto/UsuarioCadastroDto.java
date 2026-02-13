@@ -1,9 +1,11 @@
 package com.gustavosouza.votacao.dto;
 
+import com.gustavosouza.votacao.exception.NoCityFoundException;
 import com.gustavosouza.votacao.security.UserRoles;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -22,6 +24,10 @@ public record UsuarioCadastroDto(
         LocalDate dataNascimento,
 
         @NotNull(message = "O campo nome precisa ser preenchido!")
-        UserRoles role
+        UserRoles role,
+
+        @NotBlank(message = "O CEP é obrigatório!")
+        @Size(min = 8, max = 8)
+        String cep
 ) {
 }

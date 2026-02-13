@@ -7,6 +7,8 @@ import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.repository.PautaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -49,11 +51,9 @@ public class PautaService {
         repository.deleteByAssunto(assunto);
     }
 
-    public List<PautaExibicaoDto> buscarTodasPautas() {
-        return repository.findAll()
-                .stream()
-                .map(PautaExibicaoDto::new)
-                .toList();
+    public Page<PautaExibicaoDto> buscarTodasPautas(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(PautaExibicaoDto::new);
     }
 
     public PautaModel buscarPautaPeloId(Long id) {
@@ -66,40 +66,31 @@ public class PautaService {
                 ));
     }
 
-    public List<PautaExibicaoDto> buscarPautaPeloNumeroDeVotos(Integer quantidadeDeVotosNecessarios) {
-        List<PautaModel> pauta = repository.findByQuantidadeDeVotosNecessarios(quantidadeDeVotosNecessarios);
+    public Page<PautaExibicaoDto> buscarPautaPeloNumeroDeVotos(Integer quantidadeDeVotosNecessarios, Pageable pageable) {
+        Page<PautaModel> pauta = repository.findByQuantidadeDeVotosNecessarios(quantidadeDeVotosNecessarios, pageable);
 
         if (pauta.isEmpty()) {
             throw new NoAgendaFoundException();
         }
-        return pauta
-                .stream()
-                .map(PautaExibicaoDto::new)
-                .toList();
+        return pauta.map(PautaExibicaoDto::new);
     }
 
-    public List<PautaExibicaoDto> buscarPelaDataInicio(LocalDate primeiraData, LocalDate segundaData) {
-        List<PautaModel> pauta = repository.findByDataInicioBetween(primeiraData, segundaData);
+    public Page<PautaExibicaoDto> buscarPelaDataInicio(LocalDate primeiraData, LocalDate segundaData, Pageable pageable) {
+        Page<PautaModel> pauta = repository.findByDataInicioBetween(primeiraData, segundaData, pageable);
 
         if (pauta.isEmpty()) {
             throw new NoAgendaFoundException();
         }
-        return pauta
-                .stream()
-                .map(PautaExibicaoDto::new)
-                .toList();
+        return pauta.map(PautaExibicaoDto::new);
     }
 
-    public List<PautaExibicaoDto> buscarPelaDataEncerramento(LocalDate dataInicial, LocalDate dataFinal) {
-        List<PautaModel> pauta = repository.findByDataEncerramentoBetween(dataInicial, dataFinal);
+    public Page<PautaExibicaoDto> buscarPelaDataEncerramento(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {
+        Page<PautaModel> pauta = repository.findByDataEncerramentoBetween(dataInicial, dataFinal, pageable);
 
         if (pauta.isEmpty()) {
             throw new NoAgendaFoundException();
         }
-        return pauta
-                .stream()
-                .map(PautaExibicaoDto::new)
-                .toList();
+        return pauta.map(PautaExibicaoDto::new);
     }
 
 
