@@ -1,9 +1,8 @@
 package com.gustavosouza.votacao.controllers;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
-import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.model.VotosModel;
-import com.gustavosouza.votacao.services.VotosService;
+import com.gustavosouza.votacao.infra.services.VotosService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

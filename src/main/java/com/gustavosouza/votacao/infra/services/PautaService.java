@@ -1,4 +1,4 @@
-package com.gustavosouza.votacao.services;
+package com.gustavosouza.votacao.infra.services;
 
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;

@@ -3,10 +3,8 @@ package com.gustavosouza.votacao.controllers;
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
 import com.gustavosouza.votacao.model.PautaModel;
-import com.gustavosouza.votacao.services.PautaService;
-import jakarta.validation.Path;
+import com.gustavosouza.votacao.infra.services.PautaService;
 import jakarta.validation.Valid;
-import jdk.dynalink.linker.LinkerServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/pauta")

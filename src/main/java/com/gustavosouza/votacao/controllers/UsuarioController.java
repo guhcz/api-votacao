@@ -3,7 +3,7 @@ package com.gustavosouza.votacao.controllers;
 import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
 import com.gustavosouza.votacao.dto.UsuarioExibicaoDto;
 import com.gustavosouza.votacao.model.UsuarioModel;
-import com.gustavosouza.votacao.services.UsuarioService;
+import com.gustavosouza.votacao.infra.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")

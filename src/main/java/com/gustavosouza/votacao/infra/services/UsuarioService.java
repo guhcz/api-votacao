@@ -1,4 +1,4 @@
-package com.gustavosouza.votacao.services;
+package com.gustavosouza.votacao.infra.services;
 
 import com.gustavosouza.votacao.client.service.LocalidadeIbgeService;
 import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
