@@ -38,10 +38,25 @@ public class UsuarioModel implements UserDetails {
     @Column(name = "DATA_NASCIMENTO")
     private LocalDate dataNascimento;
 
+    @Column(name = "CEP")
+    private String cep;
+
+    @Column(name = "UF")
+    private String uf;
+
+    @Column(name = "ESTADO")
+    private String estado;
+
+    @Column(name = "CIDADE")
+    private String cidade;
+
+    @Column(name = "MUNICIPIO_IBGE_ID")
+    private Long municipioIbgeId;
+
     @Column(name = "ROLE")
     private UserRoles role;
 
-    public UsuarioModel (String email, String senha, UserRoles role){
+    public UsuarioModel(String email, String senha, UserRoles role) {
         this.email = email;
         this.senha = senha;
         this.role = role;
@@ -49,9 +64,13 @@ public class UsuarioModel implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role == UserRoles.MANAGER) return List.of(new SimpleGrantedAuthority("ROLE_MANAGER"), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
-        else if (this.role == UserRoles.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
-        else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        if (this.role == UserRoles.MANAGER) {
+            return List.of(new SimpleGrantedAuthority("ROLE_MANAGER"), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        } else if (this.role == UserRoles.ADMIN) {
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
     }
 
     @Override

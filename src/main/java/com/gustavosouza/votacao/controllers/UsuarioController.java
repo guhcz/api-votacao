@@ -6,6 +6,10 @@ import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +46,10 @@ public class UsuarioController {
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<List<UsuarioExibicaoDto>> buscarTodosUsuario() {
-        return ResponseEntity.status(HttpStatus.OK).body(usuarioService.buscarTodosUsuarios());
+    public ResponseEntity<Page<UsuarioExibicaoDto>> buscarTodosUsuario(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        size = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("idUsuario").descending());
+        return ResponseEntity.status(HttpStatus.OK).body(usuarioService.buscarTodosUsuarios(pageable));
     }
 
     @GetMapping("/buscar/id/{id}")
@@ -57,10 +63,13 @@ public class UsuarioController {
     }
 
     @GetMapping("/buscar/dataNascimento/{dataInicial}/{dataFinal}")
-    public ResponseEntity<List<UsuarioExibicaoDto>> filtrarPelaDataNascimento(
+    public ResponseEntity<Page<UsuarioExibicaoDto>> filtrarPelaDataNascimento(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(usuarioService.filtrarPelaDataNascimento(dataInicial, dataFinal));
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        return ResponseEntity.ok(usuarioService.filtrarPelaDataNascimento(dataInicial, dataFinal, pageable));
     }
 }

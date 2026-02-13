@@ -2,6 +2,8 @@ package com.gustavosouza.votacao.repository;
 
 import com.gustavosouza.votacao.model.UsuarioModel;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +19,6 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Long> {
     @Transactional
     void deleteByEmail(String email);
 
-    List<UsuarioModel> findByDataNascimentoBetween(LocalDate dataInicial, LocalDate dataFinal);
-
+    Page<UsuarioModel> findByDataNascimentoBetween(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable);
 
 }

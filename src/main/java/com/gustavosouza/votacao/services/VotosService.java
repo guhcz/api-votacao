@@ -7,6 +7,8 @@ import com.gustavosouza.votacao.model.VotosModel;
 import com.gustavosouza.votacao.repository.VotoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -50,8 +52,8 @@ public class VotosService {
         }
     }
 
-    public List<VotosModel> buscarTodosVotos() {
-        return votoRepository.findAll();
+    public Page<VotosModel> buscarTodosVotos(Pageable pageable) {
+        return votoRepository.findAll(pageable);
     }
 
     public VotosModel buscarVotosPeloID(Long id) {
@@ -60,14 +62,14 @@ public class VotosService {
         );
     }
 
-    public List<VotosModel> buscarPeloAssunto(String assuntoVotado) {
-        return votoRepository.findByAssuntoVotado(assuntoVotado).orElseThrow(
+    public Page<VotosModel> buscarPeloAssunto(String assuntoVotado, Pageable pageable) {
+        return votoRepository.findByAssuntoVotado(assuntoVotado, pageable).orElseThrow(
                 () -> new NoVoteFoundException()
         );
     }
 
-    public List<VotosModel> buscarPelaData(LocalDate dataInicial, LocalDate dataFinal) {
-        List<VotosModel> votos = votoRepository.findByDataVotoBetween(dataInicial, dataFinal);
+    public Page<VotosModel> buscarPelaData(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {
+        Page<VotosModel> votos = votoRepository.findByDataVotoBetween(dataInicial, dataFinal, pageable);
 
         if (votos.isEmpty()) {
             throw new NoDateFoundException();
