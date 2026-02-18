@@ -1,14 +1,18 @@
-package com.gustavosouza.votacao.infra.services;
+package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
+import com.gustavosouza.votacao.dto.StatusPauta;
 import com.gustavosouza.votacao.exception.NoAgendaFoundException;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.repository.PautaRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,6 +41,8 @@ public class PautaService {
                         pautaEntity.getDataInicio())
                 .dataEncerramento(pauta.getDataEncerramento() != null ? pauta.getDataEncerramento() :
                         pautaEntity.getDataEncerramento())
+                .status(pauta.getStatus() != null ? pauta.getStatus() :
+                        pautaEntity.getStatus())
                 .idPauta(pautaEntity.getIdPauta())
                 .build();
 
@@ -91,6 +97,39 @@ public class PautaService {
             throw new NoAgendaFoundException();
         }
         return pauta.map(PautaExibicaoDto::new);
+    }
+
+    @Transactional
+    public int fecharPautasVencidas(){
+        LocalDate agora = LocalDate.now();
+
+        int totalFechadas = 0;
+
+        Pageable pageable = PageRequest.of(
+                0,
+                200,
+                Sort.by("dataEncerramento").ascending()
+                        .and(Sort.by("idPauta").ascending()
+                        )
+        );
+
+        while (true) {
+            Page<PautaModel> page = repository.findByStatusAndDataEncerramentoBefore(StatusPauta.ABERTA, agora, pageable);
+
+            if (page.isEmpty()) break;
+
+            var pautas = page.getContent();
+            pautas.forEach(p -> p.setStatus(StatusPauta.FECHADA));
+            repository.saveAll(pautas);
+
+            totalFechadas += pautas.size();
+
+            if (!page.hasNext()) break;
+            pageable = page.nextPageable();
+        }
+
+        return totalFechadas;
+
     }
 
 

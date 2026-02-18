@@ -49,11 +49,10 @@ public class VerificarToken extends OncePerRequestFilter {
     }
 
     private String recoverToken(HttpServletRequest request) {
-        var authHeader = request.getHeader("Authorization");
-        if (authHeader == null) {
-            return null;
-        }
-        return authHeader.replace("Bearer", "");
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) return null;
+        return header.substring(7).trim();
     }
+
 
 }

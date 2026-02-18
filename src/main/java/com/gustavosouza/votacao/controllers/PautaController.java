@@ -3,7 +3,7 @@ package com.gustavosouza.votacao.controllers;
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
 import com.gustavosouza.votacao.model.PautaModel;
-import com.gustavosouza.votacao.infra.services.PautaService;
+import com.gustavosouza.votacao.services.PautaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

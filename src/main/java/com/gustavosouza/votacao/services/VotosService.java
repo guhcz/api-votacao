@@ -1,4 +1,4 @@
-package com.gustavosouza.votacao.infra.services;
+package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
 import com.gustavosouza.votacao.exception.NoDateFoundException;

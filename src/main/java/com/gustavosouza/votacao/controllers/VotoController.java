@@ -2,7 +2,7 @@ package com.gustavosouza.votacao.controllers;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
 import com.gustavosouza.votacao.model.VotosModel;
-import com.gustavosouza.votacao.infra.services.VotosService;
+import com.gustavosouza.votacao.services.VotosService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

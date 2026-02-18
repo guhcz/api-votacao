@@ -1,5 +1,6 @@
 package com.gustavosouza.votacao.model;
 
+import com.gustavosouza.votacao.dto.StatusPauta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -29,4 +30,8 @@ public class PautaModel {
 
     @Column(name = "DATA_ENCERRAMENTO")
     private LocalDate dataEncerramento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false)
+    private StatusPauta status = StatusPauta.ABERTA;
 }

@@ -1,4 +1,4 @@
-package com.gustavosouza.votacao.infra.services;
+package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.client.service.LocalidadeIbgeService;
 import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
@@ -61,6 +61,18 @@ public class UsuarioService {
                         usuarioEntity.getSenha())
                 .dataNascimento(usuario.getDataNascimento() != null ? usuario.getDataNascimento() :
                         usuarioEntity.getDataNascimento())
+                .cep(usuario.getCep() != null ? usuario.getCep() :
+                        usuarioEntity.getCep())
+                .uf(usuario.getUf()!= null ? usuario.getUf() :
+                        usuarioEntity.getUf())
+                .estado(usuario.getEstado() != null ? usuario.getEstado() :
+                        usuarioEntity.getEstado())
+                .cidade(usuario.getCidade() != null ? usuario.getCidade() :
+                        usuarioEntity.getCidade())
+                .municipioIbgeId(usuario.getMunicipioIbgeId() != null ? usuario.getMunicipioIbgeId() :
+                        usuarioEntity.getMunicipioIbgeId())
+                .role(usuario.getRole() != null ? usuario.getRole() :
+                        usuarioEntity.getRole())
                 .idUsuario(usuarioEntity.getIdUsuario())
                 .build();
         return new UsuarioExibicaoDto(usuarioRepository.save(usuarioAtualizado));
