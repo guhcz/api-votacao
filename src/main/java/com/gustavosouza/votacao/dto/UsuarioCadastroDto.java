@@ -1,6 +1,5 @@
 package com.gustavosouza.votacao.dto;
 
-import com.gustavosouza.votacao.exception.NoCityFoundException;
 import com.gustavosouza.votacao.security.UserRoles;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +19,6 @@ public record UsuarioCadastroDto(
         @NotBlank(message = "O campo senha precisa ser preenchido!")
         String senha,
 
-        @NotNull(message = "O campo data de nascimento precisa ser preenchido!")
         LocalDate dataNascimento,
 
         @NotNull(message = "O campo nome precisa ser preenchido!")
