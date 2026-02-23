@@ -4,6 +4,8 @@ import com.gustavosouza.votacao.dto.StatusPauta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,4 +36,7 @@ public class PautaModel {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
     private StatusPauta status = StatusPauta.ABERTA;
+
+    @OneToMany(mappedBy = "pautaModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<VotosModel> votosModel = new ArrayList<>();
 }

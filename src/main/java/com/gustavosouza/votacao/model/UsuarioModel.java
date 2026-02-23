@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -55,6 +56,9 @@ public class UsuarioModel implements UserDetails {
 
     @Column(name = "ROLE")
     private UserRoles role;
+
+    @OneToMany(mappedBy = "usuarioModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<VotosModel> votosModel = new ArrayList<>();
 
     public UsuarioModel(String email, String senha, UserRoles role) {
         this.email = email;

@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  oracle:
+    image: gvenzl/oracle-free:latest
+    ports:
+      - "1521:1521"
+    environment:
+      SPRING_PROFILES_ACTIVE: "oracle"
+      ORACLE_PASSWORD: Oracle#123
+      APP_USER: VOTACAO
+      APP_USER_PASSWORD: Votacao#123
+    volumes:
+      - oracle-volume:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      oracle:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@oracle:1521/FREEPDB1"
+      SPRING_DATASOURCE_USERNAME: "VOTACAO"
+      SPRING_DATASOURCE_PASSWORD: "Votacao#123"
+
+volumes:
+  oracle-volume:

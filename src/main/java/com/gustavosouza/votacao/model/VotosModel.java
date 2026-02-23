@@ -17,15 +17,22 @@ public class VotosModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID_VOTO")
-    Long idVoto;
+    private Long idVoto;
 
     @Column(name = "ASSUNTO_VOTADO", unique = true)
-    String assuntoVotado;
+    private String assuntoVotado;
 
     @Column(name = "VOTO")
-    Boolean voto;
+    private Boolean voto;
 
     @Column(name = "DATA_VOTO")
-    LocalDate dataVoto;
+    private LocalDate dataVoto;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private UsuarioModel usuarioModel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_pauta", nullable = false)
+    private PautaModel pautaModel;
 }
