@@ -26,7 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/cadastrar").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/votos/cadastro").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/votos/cadastro/{idPauta}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pauta/cadastrar").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/usuario/atualizar/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/votos/atualizar/**").hasAnyRole("ADMIN", "MANAGER")

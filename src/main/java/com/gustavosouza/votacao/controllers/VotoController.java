@@ -1,6 +1,7 @@
 package com.gustavosouza.votacao.controllers;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
+import com.gustavosouza.votacao.dto.VotoResponseDto;
 import com.gustavosouza.votacao.model.VotosModel;
 import com.gustavosouza.votacao.services.VotosService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,9 +24,20 @@ public class VotoController {
 
     private final VotosService votosService;
 
-    @PostMapping("/cadastro")
-    public ResponseEntity<VotosModel> cadastrarVoto(@RequestBody @Valid VotoCadastroDto votoCadastroDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(votosService.cadastrarVoto(votoCadastroDto));
+    @PostMapping("/cadastro/{idPauta}")
+    public ResponseEntity<VotoResponseDto> cadastrarVoto(@RequestBody @Valid VotoCadastroDto dto, @PathVariable Long idPauta, Authentication auth) {
+        VotosModel v = votosService.cadastrarVoto(dto, idPauta, auth);
+
+        VotoResponseDto resp = new VotoResponseDto(
+                v.getIdVoto(),
+                v.getAssuntoVotado(),
+                v.getVoto(),
+                v.getDataVoto(),
+                v.getPautaModel().getIdPauta(),
+                v.getUsuarioModel().getIdUsuario()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
     @PutMapping("/atualizar/{id}")

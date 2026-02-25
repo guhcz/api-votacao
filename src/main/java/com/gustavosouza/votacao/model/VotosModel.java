@@ -19,7 +19,7 @@ public class VotosModel {
     @Column(name = "ID_VOTO")
     private Long idVoto;
 
-    @Column(name = "ASSUNTO_VOTADO", unique = true)
+    @Column(name = "ASSUNTO_VOTADO")
     private String assuntoVotado;
 
     @Column(name = "VOTO")
