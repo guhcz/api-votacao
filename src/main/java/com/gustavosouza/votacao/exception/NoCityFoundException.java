@@ -6,8 +6,4 @@ public class NoCityFoundException extends RuntimeException{
         super("CEP inválido ou nao encontrado!");
     }
 
-    public NoCityFoundException(String message){
-        super(message);
-    }
-
 }

@@ -8,6 +8,7 @@ import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.repository.PautaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PautaService {
 
     private final PautaRepository repository;
@@ -114,6 +116,7 @@ public class PautaService {
         );
 
         while (true) {
+            log.debug("Buscando página {} de pautas vencidas", pageable.getPageNumber());
             Page<PautaModel> page = repository.findByStatusAndDataEncerramentoBefore(StatusPauta.ABERTA, agora, pageable);
 
             if (page.isEmpty()) break;

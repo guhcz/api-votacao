@@ -4,7 +4,7 @@ public enum UserRoles {
 
     MANAGER("manager"),
 
-    ADMIN("admin"),
+    ADMIN("ROLE_ADMIN"),
 
     USER("user");
 

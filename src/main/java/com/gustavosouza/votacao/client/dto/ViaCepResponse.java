@@ -7,7 +7,6 @@ public record ViaCepResponse(
         String cep,
         String uf,
         String localidade,
-        String ibge,
         Boolean erro
 ) {
 }
