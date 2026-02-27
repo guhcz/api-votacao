@@ -33,7 +33,7 @@ class PautaServiceTest {
 
     @Test
     @DisplayName("Should save a new agenda successfully")
-    void criarPautaCase1() {
+    void dadoParametrosValidos_quandoCriarPauta_deveCriarComSucesso() {
 
         PautaCadastroDto pautaCadastroDto = new PautaCadastroDto(
                 "Eleicoes de chefe",
@@ -70,7 +70,8 @@ class PautaServiceTest {
         when(pautaRepository.save(any(PautaModel.class)))
                 .thenThrow(new NoAgendaFoundException());
 
-        assertThrows(NoAgendaFoundException.class, () -> pautaService.criarPauta(pautaCadastroDto));
+       var exception = assertThrows(NoAgendaFoundException.class, () -> pautaService.criarPauta(pautaCadastroDto));
+       assertEquals("Pauta nao encontrada!", exception.getMessage());
 
         verify(pautaRepository, times(1)).save(any(PautaModel.class));
     }

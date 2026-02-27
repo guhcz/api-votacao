@@ -22,11 +22,10 @@ public class LocalidadeIbgeService {
         String cepLimpo = cep.replaceAll("\\\\D", "");
 
         var via = viaCepClient.buscar(cepLimpo);
-        if (Boolean.TRUE.equals(via.erro()) || via.uf() == null || via.localidade() == null || via.ibge() == null){
+        if (Boolean.TRUE.equals(via.erro()) || via.uf() == null || via.localidade() == null){
             throw new NoCityFoundException();
         }
 
-        Long municipioId = Long.parseLong(via.ibge());
 
         var ufDto = ibgeLocalidadeClient.buscarUf(via.uf());
 
@@ -34,8 +33,7 @@ public class LocalidadeIbgeService {
                 cepLimpo,
                 via.uf(),
                 ufDto.nome(),
-                via.localidade(),
-                municipioId
+                via.localidade()
         );
     }
 

@@ -55,8 +55,7 @@ class UsuarioServiceTest {
                 "17017260",
                 "SP",
                 "Sao Paulo",
-                "Bauru",
-                3506003L
+                "Bauru"
         );
 
         when(localidadeIbgeService.resolverPorCep(usuarioCadastroDto.cep()))
@@ -83,7 +82,6 @@ class UsuarioServiceTest {
         assertEquals("SP", salvo.getUf());
         assertEquals("Sao Paulo", salvo.getEstado());
         assertEquals("Bauru", salvo.getCidade());
-        assertEquals(3506003L, salvo.getMunicipioIbgeId());
     }
 
 

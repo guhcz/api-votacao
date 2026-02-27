@@ -6,8 +6,5 @@ public class NoAgendaFoundException extends RuntimeException{
         super ("Pauta nao encontrada!");
     }
 
-    public NoAgendaFoundException(String message){
-        super(message);
-    }
 
 }

@@ -28,4 +28,5 @@ public record UsuarioCadastroDto(
         @Size(min = 8, max = 8)
         String cep
 ) {
+
 }

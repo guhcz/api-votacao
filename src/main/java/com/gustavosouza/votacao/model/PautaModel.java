@@ -16,9 +16,9 @@ import java.util.List;
 @Table(name = "PAUTA")
 public class PautaModel {
 
-    // TODO: trocar para SEQUENCE e criar SEQUENCE no banco
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PAUTAS")
+    @SequenceGenerator(name = "SEQ_PAUTAS", sequenceName = "SEQ_PAUTAS", allocationSize = 1)
     @Column(name = "ID_PAUTA")
     private Long idPauta;
 

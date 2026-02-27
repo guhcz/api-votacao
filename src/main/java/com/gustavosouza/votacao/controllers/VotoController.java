@@ -26,24 +26,14 @@ public class VotoController {
 
     @PostMapping("/cadastro/{idPauta}")
     public ResponseEntity<VotoResponseDto> cadastrarVoto(@RequestBody @Valid VotoCadastroDto dto, @PathVariable Long idPauta, Authentication auth) {
-        VotosModel v = votosService.cadastrarVoto(dto, idPauta, auth);
-
-        VotoResponseDto resp = new VotoResponseDto(
-                v.getIdVoto(),
-                v.getAssuntoVotado(),
-                v.getVoto(),
-                v.getDataVoto(),
-                v.getPautaModel().getIdPauta(),
-                v.getUsuarioModel().getIdUsuario()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+        VotoResponseDto voto = votosService.cadastrarVoto(dto, idPauta, auth);
+        return ResponseEntity.status(HttpStatus.CREATED).body(voto);
     }
 
-    @PutMapping("/atualizar/{id}")
-    public ResponseEntity<VotosModel> atualizarVoto(@PathVariable Long id, @RequestBody @Valid VotosModel votosModel) {
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.atualizarVoto(id, votosModel));
-    }
+//    @PutMapping("/atualizar/{id}")
+//    public ResponseEntity<VotosModel> atualizarVoto(@PathVariable Long id, @RequestBody @Valid VotosModel votosModel) {
+//        return ResponseEntity.status(HttpStatus.OK).body(votosService.atualizarVoto(id, votosModel));
+//    }
 
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletarVoto(@PathVariable Long id) {

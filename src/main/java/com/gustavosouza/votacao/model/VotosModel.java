@@ -15,7 +15,8 @@ import java.time.LocalDate;
 public class VotosModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VOTOS")
+    @SequenceGenerator(name = "SEQ_VOTOS", sequenceName = "SEQ_VOTOS", allocationSize = 1)
     @Column(name = "ID_VOTO")
     private Long idVoto;
 

@@ -1,6 +1,7 @@
 package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
+import com.gustavosouza.votacao.dto.VotoResponseDto;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.model.VotosModel;
@@ -70,7 +71,7 @@ class VotosServiceTest {
 
         ArgumentCaptor<VotosModel> captor = ArgumentCaptor.forClass(VotosModel.class);
 
-        VotosModel retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
+        VotoResponseDto retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
 
         assertNotNull(retorno);
 
@@ -114,7 +115,7 @@ class VotosServiceTest {
         when(votoRepository.save(any(VotosModel.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        VotosModel retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
+        VotoResponseDto retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
 
         assertNotNull(retorno);
         verify(votoRepository, times(1)).save(any(VotosModel.class));

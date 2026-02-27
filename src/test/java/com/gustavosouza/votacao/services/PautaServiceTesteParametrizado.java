@@ -36,7 +36,7 @@ public class PautaServiceTesteParametrizado {
     @ParameterizedTest
     @EnumSource(StatusPauta.class)
     @DisplayName("Should mark as closed the returned agendas")
-    void fecharPautasRetornadas(StatusPauta statusInicial){
+    void dadoStatusValido_quandoFecharPautasVencidas_deveAtualizarStatusParaFechada(StatusPauta statusInicial){
 
         PautaModel p1 = new PautaModel();
         p1.setStatus(statusInicial);
