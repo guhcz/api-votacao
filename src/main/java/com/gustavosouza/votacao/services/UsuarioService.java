@@ -1,12 +1,14 @@
 package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.client.service.LocalidadeIbgeService;
+import com.gustavosouza.votacao.dto.UsuarioAtualizacaoDto;
 import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
 import com.gustavosouza.votacao.dto.UsuarioExibicaoDto;
 import com.gustavosouza.votacao.exception.NoDateFoundException;
 import com.gustavosouza.votacao.exception.NoUserFoundException;
 import com.gustavosouza.votacao.mapstruct.UsuarioMapper;
 import com.gustavosouza.votacao.model.UsuarioModel;
+import com.gustavosouza.votacao.query.UsuarioQuery;
 import com.gustavosouza.votacao.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,119 +35,80 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final LocalidadeIbgeService localidadeIbgeService;
     private final UsuarioMapper usuarioMapper;
+    private final LocalidadeIbgeService localidadeIbgeService;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public UsuarioExibicaoDto salvarUsuario(UsuarioCadastroDto usuarioDto) {
+    public UsuarioExibicaoDto salvarUsuario(UsuarioCadastroDto usuarioCadastroDto) {
 
         log.debug("Iniciando cadastrar de usuário. nome={}, email={}",
-                usuarioDto.nome(), usuarioDto.email());
-        UsuarioModel usuario = usuarioMapper.usuarioModel(usuarioDto);
+                usuarioCadastroDto.nome(), usuarioCadastroDto.email());
+
+        UsuarioModel usuario = usuarioMapper.usuarioModel(usuarioCadastroDto);
+
+        usuario.setSenha(passwordEncoder.encode(usuarioCadastroDto.senha()));
+
+        var localizacao = localidadeIbgeService.resolverPorCep(usuarioCadastroDto.cep());
+        usuario.setCep(localizacao.cep());
+        usuario.setUf(localizacao.uf());
+        usuario.setEstado(localizacao.estado());
+        usuario.setCidade(localizacao.cidade());
 
         UsuarioModel salvo = usuarioRepository.save(usuario);
-        return usuarioMapper.usuarioExibicaoDto(salvo);
 
-//        String senhaCriptografada = new BCryptPasswordEncoder().encode(usuarioDto.senha());
-//
-//        UsuarioModel usuario = new UsuarioModel();
-//        BeanUtils.copyProperties(usuarioDto, usuario);
-//        usuario.setSenha(senhaCriptografada);
-//
-//        var localizacao = localidadeIbgeService.resolverPorCep(usuarioDto.cep());
-//        usuario.setCep(localizacao.cep());
-//        usuario.setUf(localizacao.uf());
-//        usuario.setEstado(localizacao.estado());
-//        usuario.setCidade(localizacao.cidade());
-//
-////        var usuario = UsuarioModel.builder()
-////                .cep(localizacao.cep())
-////                .uf(localizacao.uf())
-////                .estado(localizacao.estado())
-////                .cidade(localizacao.cidade())
-////                .build();
-//
-//
-//
-//        log.info("Usuário criado com sucesso. usuarioId={}, nome={}, email={}",
-//                usuario.getIdUsuario(), usuario.getNome(), usuario.getEmail());
-//
-//        return new UsuarioExibicaoDto(usuarioRepository.save(usuario));
+        log.info("Usuário criado com sucesso. usuarioId={}, nome={}, email={}",
+                salvo.getIdUsuario(), salvo.getNome(), salvo.getEmail());
+
+        return usuarioMapper.usuarioExibicaoDto(salvo);
     }
 
+    public UsuarioExibicaoDto atualizarUsuarioPorId(Long id, UsuarioAtualizacaoDto usuarioAtualizacaoDto) {
 
-    public UsuarioExibicaoDto atualizarUsuarioPorId(Long id, UsuarioModel usuario) {
         log.info("Atualizando usuário. usuarioId={}", id);
-        UsuarioModel usuarioEntity = usuarioRepository.findById(id).orElseThrow(() -> new NoUserFoundException());
+        UsuarioModel usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NoUserFoundException());
 
-        log.debug("Usuario atual encontrada. usuarioId={}, nome={}", usuario.getIdUsuario(), usuario.getNome());
+        log.debug("Usuario atual encontrado. usuarioId={}, nome={}", usuario.getIdUsuario(), usuario.getNome());
 
-        UsuarioModel usuarioAtualizado = UsuarioModel.builder()
-                .email(usuario.getEmail() != null ? usuario.getEmail() :
-                        usuarioEntity.getEmail())
-                .nome(usuario.getNome() != null ? usuario.getNome() :
-                        usuarioEntity.getNome())
-                .senha(usuario.getSenha() != null ? usuario.getSenha() :
-                        usuarioEntity.getSenha())
-                .dataNascimento(usuario.getDataNascimento() != null ? usuario.getDataNascimento() :
-                        usuarioEntity.getDataNascimento())
-                .cep(usuario.getCep() != null ? usuario.getCep() :
-                        usuarioEntity.getCep())
-                .uf(usuario.getUf()!= null ? usuario.getUf() :
-                        usuarioEntity.getUf())
-                .estado(usuario.getEstado() != null ? usuario.getEstado() :
-                        usuarioEntity.getEstado())
-                .cidade(usuario.getCidade() != null ? usuario.getCidade() :
-                        usuarioEntity.getCidade())
-                .role(usuario.getRole() != null ? usuario.getRole() :
-                        usuarioEntity.getRole())
-                .idUsuario(usuarioEntity.getIdUsuario())
-                .build();
+        usuarioMapper.atualizarUsuario(usuarioAtualizacaoDto, usuario);
+
+        if (usuarioAtualizacaoDto.senha() != null && !usuarioAtualizacaoDto.senha().isBlank()){
+            usuario.setSenha(passwordEncoder.encode(usuarioAtualizacaoDto.senha()));
+        }
+
+        if (usuarioAtualizacaoDto.cep() != null && !usuarioAtualizacaoDto.cep().isBlank()) {
+            var localizacao = localidadeIbgeService.resolverPorCep(usuarioAtualizacaoDto.cep());
+            usuario.setCep(localizacao.cep());
+            usuario.setUf(localizacao.uf());
+            usuario.setEstado(localizacao.estado());
+            usuario.setCidade(localizacao.cidade());
+        }
+
+        UsuarioModel salvo = usuarioRepository.save(usuario);
 
         log.info("Usuário atualizado com sucesso.");
 
-        return new UsuarioExibicaoDto(usuarioRepository.save(usuarioAtualizado));
+        return usuarioMapper.usuarioExibicaoDto(salvo);
     }
-
 
     public void deletarUsuarioPorEmail(String email) {
         usuarioRepository.deleteByEmail(email);
     }
 
-
-    public Page<UsuarioExibicaoDto> buscarTodosUsuarios(PageRequest pageable) {
-        return usuarioRepository.findAll(pageable)
-                .map(UsuarioExibicaoDto::new);
+    public Page<UsuarioExibicaoDto> buscarTodosUsuarios(UsuarioQuery usuarioQuery, Pageable pageable) {
+        return usuarioRepository.buscarPorDataNascimento(
+                        usuarioQuery.getEmail(),
+                        usuarioQuery.getDataInicial(),
+                        usuarioQuery.getDataFinal(),
+                        pageable)
+                .map(usuarioMapper::usuarioExibicaoDto);
     }
 
-
-    public UsuarioModel buscarPorId(Long idUsuario) {
-        return usuarioRepository.findById(idUsuario).orElseThrow(
-                () -> new NoUserFoundException()
-        );
-    }
-
-
-    public UsuarioExibicaoDto buscarUsuarioPorEmail(String email) {
-        return new UsuarioExibicaoDto((UsuarioModel) usuarioRepository.findByEmail(email).orElseThrow(
-                () -> new NoUserFoundException()
-        ));
-    }
-
-
-    public Page<UsuarioExibicaoDto> filtrarPelaDataNascimento(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {
-
-        log.debug("Buscando usuário pela data de nascimento entre {} e {} (page={}, size={}, sort={})",
-                dataInicial, dataFinal, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        Page<UsuarioModel> usuario = usuarioRepository.findByDataNascimentoBetween(dataInicial, dataFinal, pageable);
-        if (usuario.isEmpty()) {
-            throw new NoDateFoundException();
-        }
-
-        log.debug("Usuários encontrados nos intervalor {}..{}. totalElementos={}, totalPages={}",
-                dataInicial, dataFinal, usuario.getTotalElements(), usuario.getTotalPages());
-
-        return usuario.map(UsuarioExibicaoDto::new);
+    public UsuarioExibicaoDto buscarPorId(Long idUsuario) {
+        return usuarioRepository.findById(idUsuario)
+                .map(usuarioMapper::usuarioExibicaoDto)
+                .orElseThrow(() -> new NoUserFoundException()
+                );
     }
 }

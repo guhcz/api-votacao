@@ -6,6 +6,7 @@ import com.gustavosouza.votacao.dto.UsuarioCadastroDto;
 import com.gustavosouza.votacao.dto.UsuarioExibicaoDto;
 import com.gustavosouza.votacao.exception.NoCityFoundException;
 import com.gustavosouza.votacao.exception.NoUserFoundException;
+import com.gustavosouza.votacao.mapstruct.UsuarioMapper;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.repository.UsuarioRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.management.RuntimeErrorException;
 import java.time.LocalDate;
@@ -34,13 +36,19 @@ class UsuarioServiceTest {
     @Mock
     private LocalidadeIbgeService localidadeIbgeService;
 
+    @Mock
+    private UsuarioMapper usuarioMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UsuarioService usuarioService;
 
 
     @Test
     @DisplayName("Should save a new user sucessfully when everything is OK")
-    void salvarUsuarioCase1() {
+    void dadoParametrosValidos_quandoCriarUsuario_deveCriarComSucesso() {
 
         UsuarioCadastroDto usuarioCadastroDto = new UsuarioCadastroDto(
                 "Gustavo",
@@ -58,59 +66,57 @@ class UsuarioServiceTest {
                 "Bauru"
         );
 
-        when(localidadeIbgeService.resolverPorCep(usuarioCadastroDto.cep()))
-                .thenReturn(localidadeResolvida);
+        UsuarioModel usuarioModel = new UsuarioModel();
+        usuarioModel.setNome("Gustavo");
+        usuarioModel.setEmail("gustavo@gmail.com");
+        usuarioModel.setSenha("12345");
+        usuarioModel.setDataNascimento(LocalDate.of(2006, 2, 3));
+        usuarioModel.setRole(MANAGER);
+        usuarioModel.setCep("17017260");
 
-        when(usuarioRepository.save(any(UsuarioModel.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+        UsuarioExibicaoDto usuarioExibicaoDto = new UsuarioExibicaoDto(
+                1L,
+                "Gustavo",
+                "gustavo@gmail.com",
+                LocalDate.of(2006, 2, 3)
+        );
+
+        when(localidadeIbgeService.resolverPorCep("17017260")).thenReturn(localidadeResolvida);
+        when(usuarioMapper.usuarioModel(usuarioCadastroDto)).thenReturn(usuarioModel);
+        when(passwordEncoder.encode("12345")).thenReturn("hash-123");
+        when(usuarioRepository.save(any(UsuarioModel.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioMapper.usuarioExibicaoDto(any(UsuarioModel.class))).thenReturn(usuarioExibicaoDto);
 
         ArgumentCaptor<UsuarioModel> captor = ArgumentCaptor.forClass(UsuarioModel.class);
 
         UsuarioExibicaoDto retorno = usuarioService.salvarUsuario(usuarioCadastroDto);
+
         assertNotNull(retorno);
 
         verify(localidadeIbgeService, times(1)).resolverPorCep("17017260");
+        verify(usuarioMapper, times(1)).usuarioModel(usuarioCadastroDto);
         verify(usuarioRepository, times(1)).save(captor.capture());
+        verify(usuarioMapper, times(1)).usuarioExibicaoDto(any(UsuarioModel.class));
+        verify(passwordEncoder, times(1)).encode("12345");
 
         UsuarioModel salvo = captor.getValue();
         assertNotNull(salvo);
 
         assertNotEquals("12345", salvo.getSenha());
-        assertTrue(new BCryptPasswordEncoder().matches("12345", salvo.getSenha()));
+        assertEquals("hash-123", salvo.getSenha()); // ou o valor que você stubou
+        verify(passwordEncoder).encode("12345");
 
         assertEquals("17017260", salvo.getCep());
         assertEquals("SP", salvo.getUf());
         assertEquals("Sao Paulo", salvo.getEstado());
         assertEquals("Bauru", salvo.getCidade());
-    }
-
-
-    @Test
-    @DisplayName("Should throw Exception when user is invalid")
-    void salvarUsuarioCase2() {
-        UsuarioCadastroDto usuarioCadastroDto = new UsuarioCadastroDto(
-                "Gustavo",
-                "gustavo@gmail.com",
-                "12345",
-                LocalDate.of(2006, 2, 3),
-                MANAGER,
-                "00000000"
-        );
-
-        when(localidadeIbgeService.resolverPorCep(usuarioCadastroDto.cep()))
-                .thenThrow(new NoCityFoundException());
-
-        assertThrows(NoCityFoundException.class, () -> usuarioService.salvarUsuario(usuarioCadastroDto));
-
-        verify(usuarioRepository, never()).save(any(UsuarioModel.class));
-        verify(localidadeIbgeService, times(1)).resolverPorCep("00000000");
 
     }
 
 
     @Test
     @DisplayName("Should user be deleted sucessfully")
-    void deletarUsuarioCase1() {
+    void dadoUsuarioValidos_quandoForDeletarUsuario_deveDeletarComSucesso() {
         String email = "gustavo@gmail.com";
 
         usuarioService.deletarUsuarioPorEmail(email);

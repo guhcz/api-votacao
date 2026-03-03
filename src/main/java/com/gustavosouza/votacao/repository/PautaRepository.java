@@ -6,6 +6,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -21,14 +24,29 @@ public interface PautaRepository extends JpaRepository<PautaModel, Long> {
     @Transactional
     void deleteByAssunto (String assunto);
 
-    Optional<PautaModel> findByAssunto(String assunto);
-
-    Page<PautaModel> findByQuantidadeDeVotosNecessarios(Integer quantidadeDeVotosNecessarios, Pageable pageable);
-
-    Page<PautaModel> findByDataInicioBetween (LocalDate primeiraData, LocalDate segundaData, Pageable pageable);
-
-    Page<PautaModel> findByDataEncerramentoBetween (LocalDate dataInicial, LocalDate dataFinal, Pageable pageable);
-
     Page<PautaModel> findByStatusAndDataEncerramentoBefore(StatusPauta status, LocalDate agora, Pageable pageable);
+
+    @Query("""
+                    SELECT DISTINCT p
+                    FROM PautaModel p
+                    LEFT JOIN p.votosModel v
+                    WHERE (:assunto IS NULL OR LOWER(p.assunto) LIKE LOWER(CONCAT('%', :assunto, '%')))
+                    AND (:dataInicioDe IS NULL OR p.dataInicio >= :dataInicioDe)
+                    AND (:dataInicioAte IS NULL OR p.dataInicio <= :dataInicioAte)
+                    AND (:dataEncerramentoDe IS NULL OR p.dataEncerramento >= :dataEncerramentoDe)
+                    AND (:dataEncerramentoAte IS NULL OR p.dataEncerramento <= :dataEncerramentoAte)
+                    GROUP BY p
+                    HAVING (:quantidadeVotos IS NULL OR COUNT(v) >= :quantidadeVotos)
+            """)
+    Page<PautaModel> buscarPorFiltros(
+            @Param("assunto") String assunto,
+            @Param("quantidadeVotos") Integer quantidadeVotos,
+            @Param("dataInicioDe") LocalDate dataInicioDe,
+            @Param("dataInicioAte") LocalDate dataInicioAte,
+            @Param("dataEncerramentoDe") LocalDate dataEncerramentoDe,
+            @Param("dataEncerramentoAte") LocalDate dataEncerramentoAte,
+            Pageable pageable
+    );
+
 
 }

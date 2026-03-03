@@ -36,8 +36,10 @@ public class PautaModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
+    @Builder.Default
     private StatusPauta status = StatusPauta.ABERTA;
 
     @OneToMany(mappedBy = "pautaModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
     private List<VotosModel> votosModel = new ArrayList<>();
 }

@@ -1,10 +1,13 @@
 package com.gustavosouza.votacao.services;
 
+import com.gustavosouza.votacao.dto.PautaAtualizacaoDto;
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
 import com.gustavosouza.votacao.dto.StatusPauta;
 import com.gustavosouza.votacao.exception.NoAgendaFoundException;
+import com.gustavosouza.votacao.mapstruct.PautaMapper;
 import com.gustavosouza.votacao.model.PautaModel;
+import com.gustavosouza.votacao.query.PautaQuery;
 import com.gustavosouza.votacao.repository.PautaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,136 +27,74 @@ import java.util.List;
 @Slf4j
 public class PautaService {
 
-    private final PautaRepository repository;
+    private final PautaRepository pautaRepository;
+    private final PautaMapper pautaMapper;
+
 
     public PautaExibicaoDto criarPauta(PautaCadastroDto pautaDto) {
-        PautaModel pauta = new PautaModel();
-        BeanUtils.copyProperties(pautaDto, pauta);
 
-        PautaModel salva = repository.save(pauta);
+        PautaModel pauta = pautaMapper.pautaModel(pautaDto);
 
+        PautaModel salvo = pautaRepository.save(pauta);
         log.info("Pauta criada com sucesso. pautaId={}, assunto={}, quantidadeDeVotos={}, dataInicio={}, dataEncerramento={}",
-                salva.getIdPauta(), salva.getAssunto(), salva.getQuantidadeDeVotosNecessarios(), salva.getDataInicio(), salva.getDataEncerramento());
+                salvo.getIdPauta(), salvo.getAssunto(), salvo.getQuantidadeDeVotosNecessarios(), salvo.getDataInicio(), salvo.getDataEncerramento());
 
-        return new PautaExibicaoDto(salva);
+        return pautaMapper.pautaExibicaoDto(salvo);
     }
 
 
-    public PautaExibicaoDto atualizarPauta(Long idPauta, PautaModel pauta) {
+    public PautaExibicaoDto atualizarPauta(Long idPauta, PautaAtualizacaoDto pautaAtualizacaoDto) {
+
         log.info("Atualizando pauta. pautaId={}", idPauta);
-
-        PautaModel pautaEntity = repository.findById(idPauta).orElseThrow(() -> new NoAgendaFoundException());
-
+        PautaModel pauta = pautaRepository.findById(idPauta)
+                .orElseThrow(() -> new NoAgendaFoundException());
         log.debug("Pauta atual encontrada. pautaId={}, statusAtual={}, dataEncerramentoAtual={}",
-                pautaEntity.getIdPauta(), pautaEntity.getStatus(), pautaEntity.getDataEncerramento());
+                pauta.getIdPauta(), pauta.getStatus(), pauta.getDataEncerramento());
 
-        PautaModel pautaAtualizada = PautaModel.builder()
-                .assunto(pauta.getAssunto() != null ? pauta.getAssunto() :
-                        pautaEntity.getAssunto())
-                .quantidadeDeVotosNecessarios(pauta.getQuantidadeDeVotosNecessarios() != null ? pauta.getQuantidadeDeVotosNecessarios() :
-                        pautaEntity.getQuantidadeDeVotosNecessarios())
-                .dataInicio(pauta.getDataInicio() != null ? pauta.getDataInicio() :
-                        pautaEntity.getDataInicio())
-                .dataEncerramento(pauta.getDataEncerramento() != null ? pauta.getDataEncerramento() :
-                        pautaEntity.getDataEncerramento())
-                .status(pauta.getStatus() != null ? pauta.getStatus() :
-                        pautaEntity.getStatus())
-                .idPauta(pautaEntity.getIdPauta())
-                .build();
+        pautaMapper.atualizarPauta(pautaAtualizacaoDto, pauta);
 
-        PautaModel salva = repository.save(pautaAtualizada);
+        PautaModel salvo = pautaRepository.save(pauta);
 
         log.info("Pauta atualizada com sucesso. pautaId={}, statusFinal={}, dataEncerramentoFinal={}",
-                salva.getIdPauta(), salva.getStatus(), salva.getDataEncerramento());
+                salvo.getIdPauta(), salvo.getStatus(), salvo.getDataEncerramento());
 
-        return new PautaExibicaoDto(salva);
+        return pautaMapper.pautaExibicaoDto(salvo);
     }
 
 
     public void excluirPauta(Long idPauta) {
-        repository.deleteById(idPauta);
+        pautaRepository.deleteById(idPauta);
     }
 
 
     public void excluirPautaPeloAssunto(String assunto) {
-        repository.deleteByAssunto(assunto);
+        pautaRepository.deleteByAssunto(assunto);
     }
 
 
-    public Page<PautaExibicaoDto> buscarTodasPautas(Pageable pageable) {
-        return repository.findAll(pageable)
-                .map(PautaExibicaoDto::new);
+    public Page<PautaExibicaoDto> buscarTodasPautas(PautaQuery pautaQuery, Pageable pageable) {
+        return pautaRepository.buscarPorFiltros(
+                        pautaQuery.getAssunto(),
+                        pautaQuery.getVotosNecessarios(),
+                        pautaQuery.getDataInicioDe(),
+                        pautaQuery.getDataInicioAte(),
+                        pautaQuery.getDataEncerramentoDe(),
+                        pautaQuery.getDataEncerramentoAte(),
+                        pageable
+                )
+                .map(pautaMapper::pautaExibicaoDto);
     }
 
 
-    public PautaModel buscarPautaPeloId(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NoAgendaFoundException());
-    }
-
-
-    public PautaExibicaoDto buscarPautaPeloAssunto(String assunto) {
-        return new PautaExibicaoDto(repository.findByAssunto(assunto)
-                .orElseThrow(() -> new NoAgendaFoundException()
-                ));
-    }
-
-
-    public Page<PautaExibicaoDto> buscarPautaPeloNumeroDeVotos(Integer quantidadeDeVotosNecessarios, Pageable pageable) {
-
-        log.debug("Buscando pautas por qtdVotosNecessarios={} (page={}, size={}, sort={})",
-                quantidadeDeVotosNecessarios,
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        Page<PautaModel> pauta = repository.findByQuantidadeDeVotosNecessarios(quantidadeDeVotosNecessarios, pageable);
-
-        if (pauta.isEmpty()) {
-            throw new NoAgendaFoundException();
-        }
-
-        log.debug("Pautas encontradas por qtdVotosNecessarios={}. totalElements={}, totalPages={}",
-                quantidadeDeVotosNecessarios, pauta.getTotalElements(), pauta.getTotalPages());
-
-        return pauta.map(PautaExibicaoDto::new);
-    }
-
-
-    public Page<PautaExibicaoDto> buscarPelaDataInicio(LocalDate primeiraData, LocalDate segundaData, Pageable pageable) {
-        Page<PautaModel> pauta = repository.findByDataInicioBetween(primeiraData, segundaData, pageable);
-
-        log.debug("Buscando pautas por dataInicio entre {} e {} (page={}, size={}, sort={})",
-                primeiraData, segundaData,
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        if (pauta.isEmpty()) {
-            throw new NoAgendaFoundException();
-        }
-
-        log.debug("Pautas encontradas no intervalo {}..{}. totalElements={}, totalPages={}",
-                primeiraData, segundaData, pauta.getTotalElements(), pauta.getTotalPages());
-        return pauta.map(PautaExibicaoDto::new);
-    }
-
-
-    public Page<PautaExibicaoDto> buscarPelaDataEncerramento(LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {
-
-        log.debug("Buscando pautas por data de encerramento entre {} e {} (page={}, size={}, sort={})",
-                dataInicial, dataFinal, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        Page<PautaModel> pauta = repository.findByDataEncerramentoBetween(dataInicial, dataFinal, pageable);
-
-        if (pauta.isEmpty()) {
-            throw new NoAgendaFoundException();
-        }
-
-        log.debug("Pautas encerradas encontradas, no intervalo {}..{}. totalElements={}, totalPages={}",
-                dataInicial, dataFinal, pauta.getTotalElements(), pauta.getTotalPages());
-
-        return pauta.map(PautaExibicaoDto::new);
+    public PautaExibicaoDto buscarPautaPeloId(Long id) {
+        return pautaRepository.findById(id)
+                .map(pautaMapper::pautaExibicaoDto)
+                .orElseThrow(() -> new NoAgendaFoundException());
     }
 
 
     @Transactional
-    public int fecharPautasVencidas(){
+    public int fecharPautasVencidas() {
 
         LocalDate agora = LocalDate.now();
 
@@ -169,13 +110,13 @@ public class PautaService {
 
         while (true) {
             log.debug("Buscando página {} de pautas vencidas", pageable.getPageNumber());
-            Page<PautaModel> page = repository.findByStatusAndDataEncerramentoBefore(StatusPauta.ABERTA, agora, pageable);
+            Page<PautaModel> page = pautaRepository.findByStatusAndDataEncerramentoBefore(StatusPauta.ABERTA, agora, pageable);
 
             if (page.isEmpty()) break;
 
             var pautas = page.getContent();
             pautas.forEach(p -> p.setStatus(StatusPauta.FECHADA));
-            repository.saveAll(pautas);
+            pautaRepository.saveAll(pautas);
 
             totalFechadas += pautas.size();
 

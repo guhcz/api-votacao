@@ -1,11 +1,13 @@
 package com.gustavosouza.votacao.controllers;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
-import com.gustavosouza.votacao.dto.VotoResponseDto;
+import com.gustavosouza.votacao.dto.VotoExibicaoDto;
 import com.gustavosouza.votacao.model.VotosModel;
+import com.gustavosouza.votacao.query.VotosQuery;
 import com.gustavosouza.votacao.services.VotosService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,45 +26,27 @@ public class VotoController {
 
     private final VotosService votosService;
 
-    @PostMapping("/cadastro/{idPauta}")
-    public ResponseEntity<VotoResponseDto> cadastrarVoto(@RequestBody @Valid VotoCadastroDto dto, @PathVariable Long idPauta, Authentication auth) {
-        VotoResponseDto voto = votosService.cadastrarVoto(dto, idPauta, auth);
+    @PostMapping("/{idPauta}")
+    public ResponseEntity<VotoExibicaoDto> cadastrarVoto(@RequestBody @Valid VotoCadastroDto dto, @PathVariable Long idPauta, Authentication auth) {
+        VotoExibicaoDto voto = votosService.cadastrarVoto(dto, idPauta, auth);
         return ResponseEntity.status(HttpStatus.CREATED).body(voto);
     }
 
-//    @PutMapping("/atualizar/{id}")
-//    public ResponseEntity<VotosModel> atualizarVoto(@PathVariable Long id, @RequestBody @Valid VotosModel votosModel) {
-//        return ResponseEntity.status(HttpStatus.OK).body(votosService.atualizarVoto(id, votosModel));
-//    }
-
-    @DeleteMapping("/deletar/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarVoto(@PathVariable Long id) {
         votosService.deletarVoto(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/buscar")
-    public ResponseEntity<Page<VotosModel>> listarTodos(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        size = Math.min(size, 100);
-        PageRequest pageable = PageRequest.of(page, size, Sort.by("idVoto").descending());
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarTodosVotos(pageable));
+    @GetMapping
+    public ResponseEntity<Page<VotoExibicaoDto>> listarTodos(@Valid @ParameterObject VotosQuery votosQuery) {
+        PageRequest pageable = PageRequest.of(votosQuery.getPage(), votosQuery.getSize(), Sort.by("idVoto").descending());
+        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarTodosVotos(votosQuery, pageable));
     }
 
-    @GetMapping("/buscar/id/{id}")
-    public ResponseEntity<VotosModel> buscarPeloId(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<VotoExibicaoDto> buscarPeloId(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarVotosPeloID(id));
-    }
-
-    @GetMapping("/buscar/assunto/{assunto}")
-    public ResponseEntity<Page<VotosModel>> buscarPeloAssunto(@PathVariable String assunto, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPeloAssunto(assunto, pageable));
-    }
-
-    @GetMapping("/buscar/data/{dataInicial}/{dataFinal}")
-    public ResponseEntity<Page<VotosModel>> buscarPelaData(@PathVariable LocalDate dataInicial, @PathVariable LocalDate dataFinal, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        return ResponseEntity.status(HttpStatus.OK).body(votosService.buscarPelaData(dataInicial, dataFinal, pageable));
     }
 
 }

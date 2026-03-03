@@ -1,7 +1,8 @@
 package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.VotoCadastroDto;
-import com.gustavosouza.votacao.dto.VotoResponseDto;
+import com.gustavosouza.votacao.dto.VotoExibicaoDto;
+import com.gustavosouza.votacao.mapstruct.VotosMapper;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.model.UsuarioModel;
 import com.gustavosouza.votacao.model.VotosModel;
@@ -37,68 +38,21 @@ class VotosServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private VotosMapper votosMapper;
+
     @InjectMocks
     private VotosService votosService;
 
 
     @Test
     @DisplayName("Should save a vote successfully")
-    void cadastrarVotoCase1() {
+    void dadoParametrosValidos_quandoCriarVoto_deveCriarComSucesso() {
 
         Long idPauta = 1L;
 
         VotoCadastroDto votoCadastroDto = new VotoCadastroDto(
-                1L,
                 "Assunto teste",
-                true,
-                LocalDate.of(2026, 2, 20)
-        );
-
-        PautaModel pauta = new PautaModel();
-
-        UsuarioModel usuario = new UsuarioModel();
-
-        Authentication auth = org.mockito.Mockito.mock(Authentication.class);
-        when(auth.getName()).thenReturn("teste@teste.com");
-
-        when(pautaRepository.findById(idPauta))
-                .thenReturn(Optional.of(pauta));
-        when(usuarioRepository.findByEmail("teste@teste.com"))
-                .thenReturn(Optional.of(usuario));
-
-        when(votoRepository.save(any(VotosModel.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        ArgumentCaptor<VotosModel> captor = ArgumentCaptor.forClass(VotosModel.class);
-
-        VotoResponseDto retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
-
-        assertNotNull(retorno);
-
-        verify(votoRepository, times(1)).save(captor.capture());
-        verify(pautaRepository, times(1)).findById(idPauta);
-        verify(usuarioRepository, times(1)).findByEmail("teste@teste.com");
-
-        VotosModel votoSalvo = captor.getValue();
-        assertNotNull(votoSalvo);
-        assertEquals("Assunto teste", votoSalvo.getAssuntoVotado());
-        assertTrue(votoSalvo.getVoto());
-        assertEquals(LocalDate.of(2026, 2, 20), votoSalvo.getDataVoto());
-        assertNotNull(votoSalvo.getPautaModel());
-        assertNotNull(votoSalvo.getUsuarioModel());
-    }
-
-
-    @Test
-    @DisplayName("Should save even if DTO is invalid (validation happens in controller)")
-    void cadastrarVotoCase2() {
-
-        // Arrange
-        Long idPauta = 1L;
-
-        VotoCadastroDto votoCadastroDto = new VotoCadastroDto(
-                1L,
-                "",
                 true,
                 LocalDate.of(2026, 2, 20)
         );
@@ -112,18 +66,55 @@ class VotosServiceTest {
         when(pautaRepository.findById(idPauta)).thenReturn(Optional.of(pauta));
         when(usuarioRepository.findByEmail("teste@teste.com")).thenReturn(Optional.of(usuario));
 
+        when(votosMapper.votosModel(any(VotoCadastroDto.class))).thenAnswer(inv -> {
+            VotoCadastroDto dto = inv.getArgument(0);
+            VotosModel voto = new VotosModel();
+            voto.setAssuntoVotado(dto.assuntoVotado());
+            voto.setDataVoto(dto.dataVoto());
+            voto.setVoto(dto.voto());
+            return voto;
+        });
+
         when(votoRepository.save(any(VotosModel.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        VotoResponseDto retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
+        VotoExibicaoDto votoExibicaoDto = new VotoExibicaoDto(
+                1L,
+                "Assunto de teste",
+                true,
+                LocalDate.of(2026, 2, 20),
+                1L,
+                1L
+        );
+
+        when(votosMapper.votoExibicaoDto(any(VotosModel.class))).thenReturn(votoExibicaoDto);
+
+        VotoExibicaoDto retorno = votosService.cadastrarVoto(votoCadastroDto, idPauta, auth);
 
         assertNotNull(retorno);
-        verify(votoRepository, times(1)).save(any(VotosModel.class));
+
+        verify(pautaRepository).findById(idPauta);
+        verify(usuarioRepository).findByEmail("teste@teste.com");
+
+        ArgumentCaptor<VotosModel> captor = ArgumentCaptor.forClass(VotosModel.class);
+        verify(votoRepository).save(captor.capture());
+
+        VotosModel salvo = captor.getValue();
+
+        assertNotNull(salvo.getPautaModel());
+        assertNotNull(salvo.getUsuarioModel());
+        assertEquals(pauta, salvo.getPautaModel());
+        assertEquals(usuario, salvo.getUsuarioModel());
+
+        assertEquals("Assunto teste", salvo.getAssuntoVotado());
+        assertEquals(LocalDate.of(2026, 2, 20), salvo.getDataVoto());
+        assertTrue(salvo.getVoto());
     }
+
 
     @Test
     @DisplayName("Should delete a vote successfully")
-    void deletarVoto() {
+    void dadoParametrosValidos_quandoEncontrarPauta_deveDeletarComSucesso() {
         Long idVoto = 1L;
 
         VotosModel voto = new VotosModel();

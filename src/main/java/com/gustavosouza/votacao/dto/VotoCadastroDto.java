@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record VotoCadastroDto(
-        @NotNull(message="A pauta é obrigatória!")
-        Long idPauta,
 
         @NotBlank(message = "O assunto votado tem que ser preenchido!")
         String assuntoVotado,

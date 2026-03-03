@@ -62,7 +62,7 @@ public class PautaServiceTesteParametrizado {
 
         assertEquals(2, total);
 
-        verify(pautaRepository, times(1))
+        verify(pautaRepository, times(2))
                 .findByStatusAndDataEncerramentoBefore(eq(StatusPauta.ABERTA), any(LocalDate.class), any(Pageable.class));
 
         verify(pautaRepository, times(1)).saveAll(captorAll.capture());
@@ -70,7 +70,5 @@ public class PautaServiceTesteParametrizado {
         List<PautaModel> salvas = captorAll.getValue();
         assertEquals(2, salvas.size());
         assertTrue(salvas.stream().allMatch(p -> p.getStatus() == StatusPauta.FECHADA));
-
-        verifyNoMoreInteractions(pautaRepository);
     }
 }

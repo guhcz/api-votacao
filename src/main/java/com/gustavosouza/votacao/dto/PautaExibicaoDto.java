@@ -1,6 +1,7 @@
 package com.gustavosouza.votacao.dto;
 
 import com.gustavosouza.votacao.model.PautaModel;
+import com.gustavosouza.votacao.model.UsuarioModel;
 
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ public record PautaExibicaoDto(
         LocalDate dataEncerramento
 ) {
 
-    public PautaExibicaoDto(PautaModel pauta){
+    public PautaExibicaoDto(PautaModel pauta) {
         this(
                 pauta.getAssunto(),
                 pauta.getQuantidadeDeVotosNecessarios(),

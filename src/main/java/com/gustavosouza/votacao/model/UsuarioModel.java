@@ -52,21 +52,18 @@ public class UsuarioModel implements UserDetails {
     @Column(name = "CIDADE")
     private String cidade;
 
-    @Column(name = "MUNICIPIO_IBGE_ID")
-    private Long municipioIbgeId;
-
     @Column(name = "ROLE")
     private UserRoles role;
 
     @OneToMany(mappedBy = "usuarioModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<VotosModel> votosModel = new ArrayList<>();
+    private final List<VotosModel> votosModel = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == UserRoles.MANAGER) {
-            return List.of(new SimpleGrantedAuthority(UserRoles.MANAGER.getRole()), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+            return List.of(new SimpleGrantedAuthority("ROLE_MANAGER"), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         } else if (this.role == UserRoles.ADMIN) {
-            return List.of(new SimpleGrantedAuthority(UserRoles.ADMIN.getRole()), new SimpleGrantedAuthority("ROLE_USER"));
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         } else {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
