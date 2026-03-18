@@ -1,14 +1,12 @@
 package com.gustavosouza.votacao.services;
 
-import com.gustavosouza.votacao.dto.PautaAtualizacaoDto;
-import com.gustavosouza.votacao.dto.PautaCadastroDto;
-import com.gustavosouza.votacao.dto.PautaExibicaoDto;
-import com.gustavosouza.votacao.dto.StatusPauta;
+import com.gustavosouza.votacao.dto.*;
 import com.gustavosouza.votacao.exception.NoAgendaFoundException;
 import com.gustavosouza.votacao.mapstruct.PautaMapper;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.query.PautaQuery;
 import com.gustavosouza.votacao.repository.PautaRepository;
+import com.gustavosouza.votacao.repository.VotoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +27,7 @@ public class PautaService {
 
     private final PautaRepository pautaRepository;
     private final PautaMapper pautaMapper;
+    private final VotoRepository votoRepository;
 
 
     public PautaExibicaoDto criarPauta(PautaCadastroDto pautaDto) {
@@ -90,6 +89,14 @@ public class PautaService {
         return pautaRepository.findById(id)
                 .map(pautaMapper::pautaExibicaoDto)
                 .orElseThrow(() -> new NoAgendaFoundException());
+    }
+
+    public ResumoPautasDto buscarResumo() {
+        long abertas = pautaRepository.countByStatus(StatusPauta.ABERTA);
+        long fechadas = pautaRepository.countByStatus(StatusPauta.FECHADA);
+        long votosRegistrados = votoRepository.count();
+
+        return new ResumoPautasDto(abertas, fechadas, votosRegistrados);
     }
 
 

@@ -48,5 +48,7 @@ public interface PautaRepository extends JpaRepository<PautaModel, Long> {
             Pageable pageable
     );
 
+    Long countByStatus(StatusPauta status);
+
 
 }

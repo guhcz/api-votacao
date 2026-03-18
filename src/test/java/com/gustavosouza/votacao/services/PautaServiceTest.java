@@ -2,6 +2,7 @@ package com.gustavosouza.votacao.services;
 
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
+import com.gustavosouza.votacao.dto.StatusPauta;
 import com.gustavosouza.votacao.exception.NoAgendaFoundException;
 import com.gustavosouza.votacao.mapstruct.PautaMapper;
 import com.gustavosouza.votacao.model.PautaModel;
@@ -59,10 +60,12 @@ class PautaServiceTest {
         salvo.setDataEncerramento(pautaModel.getDataEncerramento());
 
         PautaExibicaoDto pautaExibicaoDto = new PautaExibicaoDto(
+                1L,
                 "Eleicoes de chefe",
                 100,
                 LocalDate.of(2026, 2, 20),
-                LocalDate.of(2026, 2, 28)
+                LocalDate.of(2026, 2, 28),
+                StatusPauta.ABERTA
         );
 
         when(pautaMapper.pautaModel(any(PautaCadastroDto.class))).thenReturn(pautaModel);

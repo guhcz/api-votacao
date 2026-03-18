@@ -3,6 +3,7 @@ package com.gustavosouza.votacao.controllers;
 import com.gustavosouza.votacao.dto.PautaAtualizacaoDto;
 import com.gustavosouza.votacao.dto.PautaCadastroDto;
 import com.gustavosouza.votacao.dto.PautaExibicaoDto;
+import com.gustavosouza.votacao.dto.ResumoPautasDto;
 import com.gustavosouza.votacao.model.PautaModel;
 import com.gustavosouza.votacao.query.PautaQuery;
 import com.gustavosouza.votacao.services.PautaService;
@@ -39,15 +40,9 @@ public class PautaController {
         return ResponseEntity.status(HttpStatus.OK).body(pauta);
     }
 
-    @DeleteMapping("/id/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPautaPorId(@PathVariable Long id) {
         pautaService.excluirPauta(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @DeleteMapping("/assunto/{assunto}")
-    public ResponseEntity<Void> deletarPautaPorAssunto(@PathVariable String assunto) {
-        pautaService.excluirPautaPeloAssunto(assunto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -60,6 +55,11 @@ public class PautaController {
     @GetMapping("/{id}")
     public ResponseEntity<PautaExibicaoDto> buscarPautaPeloId(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(pautaService.buscarPautaPeloId(id));
+    }
+
+    @GetMapping("/resumo")
+    public ResumoPautasDto buscarResumo() {
+        return pautaService.buscarResumo();
     }
 
 }
